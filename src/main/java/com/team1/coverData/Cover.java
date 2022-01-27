@@ -12,7 +12,7 @@ public class Cover {
 	private static String header_life 		= "일상생활";
 	private static String text_life 		= "여러분의 일상을 동네 주민들과 함께 공유해보세요!";
 	
-	private static String cover_help	 	= "https://images.pexels.com/photos/3823489/pexels-photo-3823489.jpeg?cs=srgb&dl=pexels-andrea-piacquadio-3823489.jpg&fm=jpg";
+	private static String cover_help	 	= "https://images.pexels.com/photos/2058130/pexels-photo-2058130.jpeg?cs=srgb&dl=pexels-oleg-magni-2058130.jpg&fm=jpg";
 	private static String header_help 		= "해주세요";
 	private static String text_help	 		= "도움이 필요하신가요? 같은 동네 이웃들에게 부탁해보세요!";
 
