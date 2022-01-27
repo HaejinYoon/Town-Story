@@ -1,0 +1,9 @@
+/bin/
+/build/
+.classpath
+.project
+.settings/
+*.properties
+.springBeans
+/target/
+.DS_Store

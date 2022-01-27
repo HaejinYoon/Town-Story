@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.team1.mapper.user.UserMapper">
+	
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id"
+		keyColumn="id">
+	
+	INSERT INTO tb_user (id, pw, email, location, nickname, introduce)
+	VALUES (#{id}, #{pw}, #{email}, #{location}, #{nickname}, #{introduce})
+	
+	</insert>
+
+	<select id="select"  resultMap="userResult" >
+	SELECT u.id,
+	u.pw, 
+	u.email, 
+	u.location, 
+	u.signupday, 
+	u.nickname, 
+	u.introduce, 
+	u.profileurl, 
+	u.withdrawal, 
+	u.adminQuali,
+	f.userId,
+	f.url,
+	f.fileName
+	FROM 
+	tb_user u
+	JOIN
+	tb_file_user f 
+	ON
+	u.id = f.userId
+	WHERE email = #{email} and withdrawal = 'X'
+	</select>
+	
+	<select id="selectlogin"  resultType="com.team1.domain.user.UserVO" >
+	SELECT id,
+	pw, 
+	email, 
+	location, 
+	signupday, 
+	nickname, 
+	introduce, 
+	profileurl, 
+	withdrawal, 
+	adminQuali
+	
+	FROM 
+	tb_user 
+	
+	WHERE email = #{email} and withdrawal = 'X'
+	</select>
+	
+	<select id="readWithdrwal" resultType="com.team1.domain.user.UserVO">
+	SELECT nickname, withdrawal
+	FROM tb_user
+	WHERE withdrawal = 'X' and nickname = #{nickname}
+	</select>
+	
+	<update id="update">
+	UPDATE tb_user
+	SET
+		pw = #{pw},
+		location = #{location},
+		nickname = #{nickname},
+		introduce = #{introduce}
+	WHERE
+		id = #{id}
+	</update>
+	
+	<update id="updateRemove">
+	UPDATE tb_user
+	SET
+		withdrawal = 'O'
+	WHERE
+		email = #{email}
+	</update>
+	
+	
+	<select id="selectByNickName" resultType="com.team1.domain.user.UserVO">
+	SELECT u.id, u.pw, u.email, u.location, u.nickname, u.introduce, u.profileurl,
+	f.userId,
+	f.url,
+	f.fileName
+	FROM 
+	tb_user u
+	JOIN
+	tb_file_user f 
+	ON
+	u.id = f.userId
+	WHERE withdrawal = 'X'AND nickname = #{nickname}
+	GROUP BY nickname
+	</select>
+	
+	<select id="hasByNickName" resultType="com.team1.domain.user.UserVO">
+	SELECT id, pw, email, location, nickname, introduce, profileurl
+	FROM tb_user
+	WHERE withdrawal = 'X'AND nickname = #{nickname}
+	GROUP BY nickname
+	</select>
+	
+	<select id="hasByEmail" resultType="com.team1.domain.user.UserVO">
+	SELECT id, pw, email, location, nickname, introduce, profileurl
+	FROM tb_user
+	WHERE withdrawal = 'X'AND email = #{email}
+	GROUP BY email
+	</select>
+	
+	<select id="selectUserBoardHelp" resultType="com.team1.domain.board.HelpVO">
+	SELECT u.id, h.memberId, h.tag, h.title, h.inserted 
+	FROM tb_user u JOIN tb_board_help h
+    ON u.id = h.memberId
+    WHERE u.id = #{u.id}
+    ORDER BY h.inserted DESC;
+	</select>
+	
+	<resultMap id="userResult"
+		type="com.team1.domain.user.UserVO">
+		<result property="id" column="id" />
+		<result property="location" column="location" />
+		<result property="pw" column="pw" />
+		<result property="signupday" column="signupday" />
+		<result property="introduce" column="introduce" />
+		<result property="nickname" column="nickname" />
+		<result property="profileurl" column="profileurl" />
+		<result property="email" column="email" />
+		<result property="withdrawal" column="withdrawal" />
+
+		<collection property="file" column="id"
+			ofType="com.team1.domain.user.UserFileVO"
+			select="selectNamesByUserId" />
+	</resultMap>
+
+	<select id="selectNamesByUserId"
+		resultType="com.team1.domain.user.UserFileVO">
+		SELECT userId, fileName, url 
+		FROM
+		tb_file_user
+		WHERE 
+		userId = #{id}
+	</select>	
+	
+</mapper>

@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.team1.mapper.board.NewsMapper">
+  
+    <select id="getListSearchByContent"
+		resultType="com.team1.domain.board.NewsVO">
+		SELECT
+		n.id,
+		n.title,
+		n.content,
+		n.inserted,
+		n.updated,
+		u.nickname,
+		COUNT(r.id) replyCount
+		FROM
+		tb_board_news n
+		JOIN
+		tb_user u ON
+		n.memberId = u.id
+		LEFT JOIN
+		tb_reply_news r ON n.id = r.boardId
+		WHERE
+		content like concat('%',#{search},'%' )
+		GROUP BY n.id
+		ORDER BY n.id DESC
+	</select>
+  
+  	<resultMap id="newsResult"
+		type="com.team1.domain.board.NewsVO">
+		<result property="id" column="id" />
+		<result property="memberId" column="memberId" />
+		<result property="location" column="location" />
+		<result property="up" column="up" />
+		<result property="views" column="views" />
+		<result property="title" column="title" />
+		<result property="nickname" column="nickname" />
+		<result property="content" column="content" />
+		<result property="inserted" column="inserted" />
+		<result property="updated" column="updated" />
+		<result property="replyCount" column="replyCount" />
+
+		<collection property="fileList" column="id"
+			javaType="java.util.ArrayList"
+			ofType="com.team1.domain.board.NewsFileVO"
+			select="selectNamesByBoardId" />
+	</resultMap>
+
+	<select id="selectNamesByBoardId"
+		resultType="com.team1.domain.board.NewsFileVO">
+		SELECT id, postId, fileName, url, isThumbnail FROM
+		tb_file_news WHERE postId =#{boardId}
+	</select>
+
+	<select id="getList" resultMap="newsResult">
+		SELECT
+		p.id, p.memberId,
+		p.location, (SELECT count(postId) FROM tb_board_news_up
+		WHERE postId =
+		p.id) up, p.views, p.tag,
+		p.title, p.content, p.inserted, p.updated,
+		m.nickname, COUNT(r.id) replyCount,
+		(SELECT nu.userId FROM
+		tb_board_news_up nu WHERE nu.userId =
+		#{loginId} AND nu.postId=p.id)
+		upposession,
+		datediff(now(), p.inserted) newMark
+		FROM tb_board_news p
+		JOIN tb_user m
+		ON m.id = p.memberId
+		LEFT
+		JOIN tb_reply_news r
+		ON p.id = r.boardId
+
+		GROUP BY p.id
+		Order By p.id
+		DESC;
+	</select>
+
+
+	<select id="read" resultMap="newsResult">
+		SELECT
+		p.id, p.memberId, p.location,
+		(SELECT count(postId) FROM tb_board_news_up
+		WHERE postId = p.id) up,
+		p.views, p.tag,
+		p.title, p.content, p.inserted, p.updated, m.nickname, m.profileurl, fu.url, fu.fileName,
+		COUNT(r.id) replyCount,
+		(SELECT hu.userId FROM tb_board_news_up hu
+		WHERE hu.userId =
+		#{loginId} AND hu.postId=p.id) upposession,
+		(SELECT count(id) FROM tb_report WHERE newsId=#{id} AND categories = '게시글') reportCount
+		FROM
+		tb_board_news p
+		JOIN tb_user m
+		ON m.id = p.memberId
+		LEFT JOIN
+		tb_reply_news r
+		ON p.id = r.boardId
+		JOIN
+		tb_file_user fu
+		ON m.id = fu.userId
+		WHERE p.id = #{id}
+	</select>
+	
+	<select id="getListByUserId" resultMap="newsResult">
+		SELECT
+		p.id, p.memberId, p.location,
+		f.userId,
+		f.url,
+		f.fileName,
+		(SELECT count(postId) FROM tb_board_news_up
+		WHERE postId = p.id) up,
+		p.views, p.tag,
+		p.title, p.content, p.inserted, p.updated, m.nickname, m.profileurl,
+		COUNT(r.id) replyCount,
+		(SELECT hu.userId FROM tb_board_news_up hu
+		WHERE hu.userId =
+		#{loginId} AND hu.postId=p.id) upposession,
+		datediff(now(), p.inserted) newMark
+		FROM
+		tb_board_news p
+		JOIN tb_user m
+		ON m.id = p.memberId
+		LEFT JOIN
+		tb_reply_news r
+		ON p.id = r.boardId
+		JOIN
+		tb_file_user f 
+		ON
+		m.id = f.userId
+		
+		WHERE p.memberId = #{Id}
+		
+		GROUP BY p.id
+		Order By p.id
+		DESC;
+	</select>
+
+	<select id="getListByConditions" resultMap="newsResult">
+		SELECT
+		p.id,
+		p.memberId, p.location, (SELECT count(postId) FROM
+		tb_board_news_up
+		WHERE postId = p.id) up, p.views, p.tag,
+		p.title,
+		p.content,
+		p.inserted, p.updated, m.nickname, COUNT(r.id) replyCount,
+		(SELECT
+		hu.userId FROM tb_board_news_up hu WHERE hu.userId =
+		#{loginId}
+		AND
+		hu.postId=p.id) upposession,
+		datediff(now(), p.inserted) newMark
+		FROM tb_board_news p
+		JOIN tb_user m
+		ON
+		m.id =
+		p.memberId
+		LEFT JOIN tb_reply_news r
+		ON p.id = r.boardId
+
+	<where>
+		<if test="query != null">
+			AND p.content like concat('%',#{query},'%' )
+		</if>
+
+		<if test="location != null">
+			AND p.location = #{location}
+		</if>
+
+		<if test="tag != null">
+			AND p.tag = #{tag}
+		</if>
+	</where>
+
+		GROUP BY p.id
+		Order By p.id
+		DESC;
+
+	</select>
+
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id"
+		keyColumn="id">
+		INSERT INTO
+		tb_board_news (memberId, location, tag, title,
+		content)
+		VALUES
+		(#{memberId}, #{location},
+		#{tag}, #{title}, #{content})
+	</insert>
+
+	<update id="update">
+		UPDATE tb_board_news
+		SET
+		tag = #{tag},
+		title = #{title},
+		content = #{content},
+		updated = NOW()
+		WHERE id = #{id}
+	</update>
+
+	<delete id="delete">
+		DELETE FROM tb_board_news WHERE id = #{id}
+	</delete>
+
+	<update id="upViews">
+		UPDATE tb_board_news
+		SET views = views +1
+		WHERE id =
+		#{id}
+	</update>
+	<select id="getFiles"
+		resultType="com.team1.domain.board.NewsFileVO">
+		SELECT id, postId, fileName, COUNT(postId) countpostId FROM
+		tb_file_news GROUP BY postId;
+	</select>
+	<select id="getFilesById"
+		resultType="com.team1.domain.board.NewsFileVO">
+		SELECT id, postId, fileName, COUNT(postId) countpostId FROM
+		tb_file_news WHERE postId=#{id} GROUP BY postId;
+	</select>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  </mapper>

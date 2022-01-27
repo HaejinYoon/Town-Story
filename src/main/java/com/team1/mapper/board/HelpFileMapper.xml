@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.team1.mapper.board.HelpFileMapper">
+	<delete id="deleteByBoardId">
+		DELETE FROM tb_file_help WHERE postId = #{boardId}
+	</delete>
+	<delete id="delete">
+		DELETE FROM tb_file_help WHERE postId = #{boardId}
+		AND fileName = #{fileName}
+	</delete>
+
+	<delete id="deleteByUrl">
+		DELETE FROM tb_file_help WHERE url = #{url}
+	</delete>
+
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id"
+		keyColumn="id">
+		INSERT INTO tb_file_help (postId, fileName, url,
+		isThumbnail) VALUES (#{postId}, #{fileName}, #{url}, #{isThumbnail})
+	</insert>
+
+	<update id="setThumbnailById">
+		UPDATE tb_file_help
+		SET isThumbnail = 1
+		WHERE id =
+		#{Id}
+	</update>
+
+	<update id="unsetThumbnailById">
+		UPDATE tb_file_help
+		SET isThumbnail = 0
+		WHERE id =
+		#{Id}
+	</update>
+
+
+	<select id="selectNamesByBoardId"
+		resultType="com.team1.domain.board.HelpFileVO">
+		SELECT id, postId, fileName, url, isThumbnail FROM
+		tb_file_help WHERE postId =#{boardId}
+	</select>
+
+	<select id="selectByUrl"
+		resultType="com.team1.domain.board.HelpFileVO">
+		SELECT id, postId, fileName, url, isThumbnail FROM
+		tb_file_help WHERE url =#{url}
+	</select>
+
+</mapper>

@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.team1.mapper.board.QuestionMapper">
+
+
+	<select id="getCountRows" resultType="int">
+		SELECT COUNT(*) FROM tb_board_question q
+		<where>
+			<if test="query != null">
+				AND q.content like concat('%',#{query},'%' )
+			</if>
+
+			<if test="location != null">
+				AND q.location = #{location}
+			</if>
+
+			<if test="tag != null">
+				AND q.tag = #{tag}
+			</if>
+		</where>
+	</select>
+
+	<select id="getList"
+		resultType="com.team1.domain.board.QuestionVO">
+		SELECT
+		q.id,
+		u.id,
+		u.nickname,
+		q.memberId,
+		q.views,
+		q.tag,
+		q.content,
+		q.location,
+		q.title,
+		q.inserted,
+		q.updated,
+		q.notice,
+		datediff(now(), q.inserted) newMark
+		FROM
+		tb_user u
+		JOIN
+		tb_board_question q
+		ON
+		u.id = q.memberId
+		LEFT
+		JOIN tb_reply_question r
+		ON q.id=r.boardId
+		GROUP BY q.id
+		ORDER BY q.id DESC
+	</select>
+	
+	<select id="getListPage"
+		resultType="com.team1.domain.board.QuestionVO">
+		SELECT
+		q.id,
+		u.id,
+		u.nickname,
+		q.memberId,
+		q.tag,
+		q.content,
+		q.location,
+		q.title,
+		q.inserted,
+		q.updated,
+		q.notice,
+		datediff(now(), q.inserted) newMark,
+		COUNT(rq.id) replyCount,
+		COUNT(fq.id) fileCount
+		FROM
+		tb_user u
+		JOIN
+		tb_board_question q
+		ON
+		u.id = q.memberId
+		LEFT JOIN
+		tb_reply_question rq
+		ON
+		q.id = rq.boardId
+		LEFT JOIN
+		tb_file_question fq
+		ON
+		q.id = fq.postId
+
+		<where>
+			<if test="query != null">
+				AND q.content like concat('%',#{query},'%' )
+			</if>
+
+			<if test="location != null">
+				AND q.location = #{location}
+			</if>
+
+			<if test="tag != null">
+				AND q.tag = #{tag}
+			</if>
+		</where>
+		GROUP BY q.id
+		ORDER BY q.id DESC
+		LIMIT #{from}, #{items}
+	</select>
+	
+	<select id="getListByUserId" resultType="com.team1.domain.board.QuestionVO">
+		SELECT
+		q.id,
+		u.id,
+		u.profileurl,
+		f.userId,
+		f.url,
+		f.fileName,
+		u.nickname,
+		q.memberId,
+		q.views,
+		q.tag,
+		q.content,
+		q.location,
+		q.title,
+		q.inserted,
+		q.updated,
+		q.notice,
+		datediff(now(), q.inserted) newMark
+		FROM
+		tb_user u
+		JOIN
+		tb_board_question q
+		ON
+		u.id = q.memberId
+		LEFT
+		JOIN tb_reply_question r
+		ON q.id=r.boardId
+		JOIN
+		tb_file_user f 
+		ON
+		u.id = f.userId
+		
+		WHERE q.memberId = #{Id}
+		
+		GROUP BY q.id
+		ORDER BY q.id DESC
+	</select>
+	
+	<select id="getListPageByNotice"
+		resultType="com.team1.domain.board.QuestionVO">
+		SELECT
+		q.id,
+		u.id,
+		u.nickname,
+		q.memberId,
+		q.tag,
+		q.content,
+		q.location,
+		q.title,
+		q.inserted,
+		q.updated,
+		q.notice,
+		datediff(now(), q.inserted) newMark,
+		COUNT(rq.id) replyCount,
+		COUNT(fq.id) fileCount
+		FROM
+		tb_user u
+		JOIN
+		tb_board_question q
+		ON
+		u.id = q.memberId
+		LEFT JOIN
+		tb_reply_question rq
+		ON
+		q.id = rq.boardId
+		LEFT JOIN
+		tb_file_question fq
+		ON
+		q.id = fq.postId
+
+		WHERE q.notice = 1
+		GROUP BY q.id
+		ORDER BY q.id DESC
+	</select>
+
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id"
+		keyColumn="id">
+		INSERT INTO
+		tb_board_question (memberId, location,
+		tag, title, content, notice)
+		VALUES
+		(#{memberId}, #{location},
+		#{tag}, #{title},
+		#{content}, #{notice})
+	</insert>
+
+	<update id="update">
+		UPDATE tb_board_question
+		SET
+		tag = #{tag},
+		title = #{title},
+		content = #{content},
+		updated = NOW(),
+		notice = #{notice}
+		WHERE id = #{id}
+	</update>
+
+	<delete id="delete">
+		DELETE FROM tb_board_question WHERE id = #{id}
+	</delete>
+	
+	<update id="upViews">
+		UPDATE 
+		tb_board_question
+		SET 
+		views = views +1
+		WHERE 
+		id = #{id}
+	</update>
+	
+	<select id="read" resultMap="questionResult"> 
+		SELECT
+
+		q.id,
+		q.memberId,
+		q.title,
+		q.content,
+		q.tag,
+		q.views,
+		q.inserted,
+		q.location,
+		q.updated,
+		q.notice,
+		COUNT(r.id) replyCount,
+		u.nickname,
+		u.profileurl,
+		fu.url,
+		fu.fileName,
+		(SELECT count(id) FROM tb_report WHERE questionId=#{id} AND categories = '게시글') reportCount,
+		(SELECT hu.userId FROM tb_board_help_up hu
+		WHERE hu.userId =
+		#{loginId} AND hu.postId=q.id) upposession,
+		(SELECT count(postId) FROM tb_board_help_up
+		WHERE postId = q.id) up
+		FROM
+		tb_board_question q
+		JOIN
+		tb_user u 
+		ON 
+		q.memberId = u.id
+		LEFT JOIN
+		tb_reply_question r
+		ON q.id = r.boardId
+		JOIN
+		tb_file_user fu
+		ON u.id = fu.userId
+		WHERE q.id = #{id}
+
+	</select>
+	
+	<resultMap id="questionResult"
+		type="com.team1.domain.board.QuestionVO">
+		<result property="id" column="id" />
+		<result property="memberId" column="memberId" />
+		<result property="location" column="location" />
+		<result property="up" column="up" />
+		<result property="views" column="views" />
+		<result property="title" column="title" />
+		<result property="nickname" column="nickname" />
+		<result property="content" column="content" />
+		<result property="inserted" column="inserted" />
+		<result property="updated" column="updated" />
+		<result property="replyCount" column="replyCount" />
+
+		<collection property="fileList" column="id"
+			javaType="java.util.ArrayList"
+			ofType="com.team1.domain.board.QuestionFileVO"
+			select="selectNamesByBoardId" />
+	</resultMap>
+
+	<select id="selectNamesByBoardId"
+		resultType="com.team1.domain.board.QuestionFileVO">
+		SELECT id, postId, fileName, url FROM
+		tb_file_question WHERE postId =#{boardId}
+	</select>
+	
+		<select id="getFiles"
+		resultType="com.team1.domain.board.HelpFileVO">
+		SELECT id, postId, fileName, COUNT(postId) countpostId FROM
+		tb_file_question GROUP BY postId;
+	</select>
+	
+	<select id="getFilesById"
+		resultType="com.team1.domain.board.HelpFileVO">
+		SELECT id, postId, fileName, COUNT(postId) countpostId FROM
+		tb_file_question WHERE postId=#{id} GROUP BY postId;
+	</select>
+	
+</mapper>

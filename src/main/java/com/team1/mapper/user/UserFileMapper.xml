@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.team1.mapper.user.UserFileMapper">
+	
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id"
+		keyColumn="id">
+		INSERT 
+		INTO 
+		tb_file_user (userId, fileName, url) 
+		VALUES
+		(#{userId}, #{fileName}, #{url})
+	</insert>
+	
+	 <delete id="delete">
+		DELETE FROM tb_file_user WHERE userId = #{userId}
+		AND fileName = #{fileName}
+	</delete>
+
+	<delete id="deleteByUrl">
+		DELETE FROM tb_file_user WHERE url = #{url}
+	</delete>
+	
+
+</mapper>

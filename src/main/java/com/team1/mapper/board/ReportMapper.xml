@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+  <mapper namespace="com.team1.mapper.board.ReportMapper">
+
+	<select id="getList" resultType="com.team1.domain.board.ReportVO">
+		SELECT
+		id, boardName, boardUrl, title, nickname, 
+		reason, reasonDetail, inserted, 
+		helpId, lifeId, newsId, questionId, title, helpReplyId, helpReReplyId, lifeReplyId, lifeReReplyId, newsReplyId, newsReReplyId, questionReplyId, questionReReplyId, categories
+		FROM
+		tb_report
+		ORDER BY id DESC
+	</select>
+
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id"
+		keyColumn="id">
+		INSERT INTO
+		tb_report 
+		(boardName, boardUrl, nickname, 
+		reason, reasonDetail, 
+		helpId, lifeId, newsId, questionId, title, helpReplyId, helpReReplyId, lifeReplyId, lifeReReplyId, newsReplyId, newsReReplyId, questionReplyId, questionReReplyId, categories)
+		VALUES
+		(#{boardName}, #{boardUrl}, #{nickname}, 
+		#{reason}, #{reasonDetail}, 
+		#{helpId}, #{lifeId}, #{newsId}, #{questionId}, #{title}, #{helpReplyId}, #{helpReReplyId}, #{lifeReplyId}, #{lifeReReplyId}, #{newsReplyId}, #{newsReReplyId}, #{questionReplyId}, #{questionReReplyId}, #{categories})
+	</insert>
+
+	<delete id="delete">
+		DELETE FROM tb_report WHERE id=#{id}
+		<!-- <where>
+			<if test="helpId != null">
+				id=#{id} OR helpId = #(SELECT id FROM tb_report WHERE id = #{id})
+			</if>
+			<if test="lifeId != null">
+				id=#{id} OR lifeId = #(SELECT lifeId FROM tb_report WHERE id = #{id})
+			</if>
+			<if test="newsId != null">
+				id=#{id} OR newsId = #(SELECT newsId FROM tb_report WHERE id = #{id})
+			</if>
+			<if test="questionId != null">
+				id=#{id} OR questionId = #(SELECT questionId FROM tb_report WHERE id = #{id})
+			</if>
+		</where> -->
+	</delete>
+	
+	<delete id="deleteByHelpId">
+		DELETE FROM tb_report
+		WHERE
+		helpId = #{helpId}
+	</delete>
+	
+	<delete id="deleteByLifeId">
+		DELETE FROM tb_report
+		WHERE
+		lifeId = #{lifeId}
+	</delete>
+	
+	<delete id="deleteByNewsId">
+		DELETE FROM tb_report
+		WHERE
+		newsId = #{newsId}
+	</delete>
+	
+	<delete id="deleteByQuestionId">
+		DELETE FROM tb_report
+		WHERE
+		questionId = #{questionId}
+	</delete>
+	
+		<delete id="deleteByHelpReplyId">
+		DELETE FROM tb_report
+		WHERE
+		helpReplyId = #{helpReplyId}
+	</delete>
+	
+	<delete id="deleteByLifeReplyId">
+		DELETE FROM tb_report
+		WHERE
+		lifeReplyId = #{lifeReplyId}
+	</delete>
+	
+	<delete id="deleteByNewsReplyId">
+		DELETE FROM tb_report
+		WHERE
+		newsReplyId = #{newsReplyId}
+	</delete>
+	
+	<delete id="deleteByQuestionReplyId">
+		DELETE FROM tb_report
+		WHERE
+		questionReplyId = #{questionReplyId}
+	</delete>
+	
+		<delete id="deleteByHelpReReplyId">
+		DELETE FROM tb_report
+		WHERE
+		helpReReplyId = #{helpReReplyId}
+	</delete>
+	
+	<delete id="deleteByLifeReReplyId">
+		DELETE FROM tb_report
+		WHERE
+		lifeReReplyId = #{lifeReReplyId}
+	</delete>
+	
+	<delete id="deleteByNewsReReplyId">
+		DELETE FROM tb_report
+		WHERE
+		newsReReplyId = #{newsReReplyId}
+	</delete>
+	
+	<delete id="deleteByQuestionReReplyId">
+		DELETE FROM tb_report
+		WHERE
+		questionReReplyId = #{questionReReplyId}
+	</delete>
+	
+	<select id="countHelpReplyId" resultType="Int">
+		SELECT
+		count(id)
+		FROM
+		tb_report
+		WHERE helpReplyId = #{helpReplyId}
+	</select>
+	
+	<select id="countLifeReplyId" resultType="Int">
+		SELECT
+		count(id)
+		FROM
+		tb_report
+		WHERE lifeReplyId = #{lifeReplyId}
+	</select>
+	
+	<select id="countNewsReplyId" resultType="Int">
+		SELECT
+		count(id)
+		FROM
+		tb_report
+		WHERE newsReplyId = #{newsReplyId}
+	</select>
+	
+	<select id="countQuestionReplyId" resultType="Int">
+		SELECT
+		count(id)
+		FROM
+		tb_report
+		WHERE questionReplyId = #{questionReplyId}
+	</select>
+	
+	<select id="countHelpReReplyId" resultType="Int">
+		SELECT
+		count(id)
+		FROM
+		tb_report
+		WHERE helpReReplyId = #{helpReReplyId}
+	</select>
+	
+	<select id="countLifeReReplyId" resultType="Int">
+		SELECT
+		count(id)
+		FROM
+		tb_report
+		WHERE lifeReReplyId = #{lifeReReplyId}
+	</select>
+	
+	<select id="countNewsReReplyId" resultType="Int">
+		SELECT
+		count(id)
+		FROM
+		tb_report
+		WHERE newsReReplyId = #{newsReReplyId}
+	</select>
+	
+	<select id="countQuestionReReplyId" resultType="Int">
+		SELECT
+		count(id)
+		FROM
+		tb_report
+		WHERE questionReReplyId = #{questionReReplyId}
+	</select>
+
+</mapper>
